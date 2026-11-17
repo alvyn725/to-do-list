@@ -1,0 +1,5 @@
+.invalid-task-name,
+.invalid-date {
+  border-color: red;
+  border-style: solid;
+}
