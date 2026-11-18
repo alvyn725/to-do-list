@@ -3,12 +3,10 @@ const taskListElement = document.querySelector('.js-task-list');
 const taskList = [];
 
 const dueDateInputElement = document.querySelector('.js-due-date-input');
-
+const doDateInputElement = document.querySelector('.js-do-date-input');
 
 function addTask(payload) {
-  console.log('task was added');
   taskList.push(payload);
-  console.log(taskList);
   renderToDoList()
 }
 
@@ -16,10 +14,18 @@ function renderToDoList() {
   let taskListHTML = '';
   taskList.forEach((value, index) => {
     const taskName = value.name;
+    const doDate = value.doDate;
     const dueDate = value.dueDate;
-    taskListHTML += `<p>Task Name: ${taskName} Due Date: ${dueDate}</p>`
+    const deleteButton = '<button class="js-delete-button">Delete</button>'
+    taskListHTML += `<p>Task Name: ${taskName} Do Date: ${doDate} Due Date: ${dueDate}</p>${deleteButton}`;
   });
   taskListElement.innerHTML = taskListHTML;
+
+  document.querySelectorAll('.js-delete-button').forEach((deleteButton, index) => {
+    deleteButton.addEventListener('click', () => {
+      deleteTask(index);
+    });
+  });
 }
 
 function inputCheckStrings(input) {
@@ -42,9 +48,12 @@ function inputCheckDates(input) {
 
 function validateInformation() {
   const taskName = taskNameInput.value.trim();
-  const dueDate = dueDateInputElement.value
+  const dueDate = dueDateInputElement.value;
+  const doDate = doDateInputElement.value;
+
   taskNameInput.classList.remove('invalid-task-name');
   dueDateInputElement.classList.remove('invalid-date');
+  doDateInputElement.classList.remove('invalid-date');
 
   if (inputCheckStrings(taskName) === false) {
     taskNameInput.classList.add('invalid-task-name');
@@ -54,15 +63,27 @@ function validateInformation() {
     dueDateInputElement.classList.add('invalid-date');
   }
 
-  if (inputCheckStrings(taskName) && inputCheckDates(dueDate)) {
+  if (inputCheckDates(doDate) === false) {
+    doDateInputElement.classList.add('invalid-date')
+  }
+
+  if (inputCheckStrings(taskName) && inputCheckDates(dueDate) && inputCheckDates(doDate)) {
     taskNameInput.classList.remove('invalid-task-name');
     const payload = {
       name: taskName,
+      doDate: doDate,
       dueDate: dueDate
     }
     addTask(payload);
     taskNameInput.value = '';
+    doDateInputElement.value = '';
+    dueDateInputElement.value = '';
   }
+}
+
+function deleteTask(index) {
+  taskList.splice(index, 1);
+  renderToDoList()
 }
 
 taskNameInput.addEventListener('keydown', event => {
@@ -70,5 +91,9 @@ taskNameInput.addEventListener('keydown', event => {
 });
 
 dueDateInputElement.addEventListener('keydown', event => {
+  if (event.key === 'Enter') validateInformation();
+});
+
+doDateInputElement.addEventListener('keydown', event => {
   if (event.key === 'Enter') validateInformation();
 });
