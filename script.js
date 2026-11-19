@@ -1,9 +1,11 @@
 const taskNameInput = document.querySelector('.js-task-name-input');
 const taskListElement = document.querySelector('.js-task-list');
-const taskList = [];
+const taskList = JSON.parse(localStorage.getItem('taskList')) || [];
 
 const dueDateInputElement = document.querySelector('.js-due-date-input');
 const doDateInputElement = document.querySelector('.js-do-date-input');
+
+renderToDoList();
 
 function addTask(payload) {
   taskList.push(payload);
@@ -16,8 +18,14 @@ function renderToDoList() {
     const taskName = value.name;
     const doDate = value.doDate;
     const dueDate = value.dueDate;
-    const deleteButton = '<button class="js-delete-button">Delete</button>'
-    taskListHTML += `<p>Task Name: ${taskName} Do Date: ${doDate} Due Date: ${dueDate}</p>${deleteButton}`;
+    taskListHTML += `
+      <div class="task-card">
+        <p>${taskName}</p>
+        <p>${doDate}</p>
+        <p>${dueDate}</p>
+        <button class="js-delete-button">Delete</button> 
+      </div>
+    `;
   });
   taskListElement.innerHTML = taskListHTML;
 
@@ -26,6 +34,7 @@ function renderToDoList() {
       deleteTask(index);
     });
   });
+  localStorage.setItem('taskList', JSON.stringify(taskList));
 }
 
 function inputCheckStrings(input) {

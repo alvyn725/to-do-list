@@ -1,5 +1,23 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 .invalid-task-name,
 .invalid-date {
   border-color: red;
   border-style: solid;
+}
+
+.info-row,
+.input-row,
+.task-card {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  column-gap: 25px;
+}
+
+.input-row input {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
 }
