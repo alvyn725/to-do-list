@@ -7,12 +7,19 @@
   <body>
     <div class="info-row">
       <label for="task-name">Task Name</label>
+      <label for="status">Status</label>
       <label for="do-date">Do Date</label>
       <label for="due-date">Due Date</label>
       <label for="notes">Notes</label>
     </div>
     <div class="input-row">
       <input placeholder="e.g. Walk my dog" class="js-task-name-input" id="task-name">
+      <select id="status" class="js-status-input">
+        <option selected>Not Started</option>
+        <option>In Progress</option>
+        <option>Complete</option>
+      </select>
+
       <input type="date" class="js-do-date-input" id="do-date">
       <input type="date" class="js-due-date-input" id="due-date">
       <input placeholder="e.g Make sure walk him along Oak Street" class="js-notes-input" id="notes">

@@ -2,15 +2,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.invalid-task-name,
-.invalid-date,
-.invalid-notes {
+.invalid {
   border-color: red;
   border-style: solid;
 }
 
-.invalid-task-name:focus,
-.invalid-date:focus {
+.invalid:focus {
   outline: none;
 }
 
@@ -18,12 +15,13 @@ body {
 .input-row,
 .task-card {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 2fr 1fr;
   column-gap: 25px;
   margin-bottom: 20px;
 }
 
-.input-row input {
+.input-row input,
+.task-card input {
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 10px;
