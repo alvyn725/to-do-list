@@ -2,7 +2,7 @@ const taskListElement = document.querySelector('.js-task-list');
 const addButtonElement = document.querySelector('.js-add-button');
 
 const taskNameInputElement = document.querySelector('.js-task-name-input');
-const statusInputElement = document.querySelector('.js-status-input')
+const statusInputElement = document.querySelector('.js-status-input');
 const dueDateInputElement = document.querySelector('.js-due-date-input');
 const doDateInputElement = document.querySelector('.js-do-date-input');
 const notesInputElement = document.querySelector('.js-notes-input');
@@ -25,7 +25,7 @@ if (!Array.isArray(taskList)) {
       !inputCheckDropdown(statusInputElement, value.status) ||
       !inputCheckDates(value.dueDate) ||
       !inputCheckDates(value.doDate) ||
-      !inputCheckStrings(value.notes)
+      !inputCheckStrings(value.notes, false)
     ) {
       deleteTask(i, false);
     }
@@ -37,44 +37,84 @@ renderToDoList();
 
 function addTask(payload) {
   taskList.push(payload);
-  renderToDoList()
+  renderToDoList();
 }
 
 function renderToDoList() {
   let taskListHTML = '';
-  let taskHTML = '';
+
   taskList.forEach((value, index) => {
     const taskName = replaceSymbolsHTMLEntities(value.name);
     const doDate = replaceSymbolsHTMLEntities(value.doDate);
     const dueDate = replaceSymbolsHTMLEntities(value.dueDate);
-    const notes = replaceSymbolsHTMLEntities(value.notes);
-    taskHTML = `      
+    const rawNotes = value.notes === 'Add notes...' ? '' : (value.notes || '');
+    const notes = replaceSymbolsHTMLEntities(rawNotes);
+    const urgency = getUrgency(index);
+
+    taskListHTML += `
       <div class="task-card">
-        <input class="update task-name-update js-text-update" data-field="name" data-index="${index}" value="${taskName}">
-        <select class="update js-dropdown-update" data-field="status" data-index="${index}">
-          <option>Not Started</option>
-          <option>In Progress</option>
-          <option>Complete</option>
-        </select>
-        <input type="date" class="update js-status-update js-date-update" data-field="doDate" value="${doDate}" data-index="${index}">
-        <input type="date" class="update js-date-update" data-field="dueDate" value="${dueDate}" data-index="${index}">
-        <input class="update js-text-update" data-field="notes" value="${notes}" data-index="${index}">
-        <button class="js-delete-button">Delete</button> 
-      </div>  
+        <div class="first-row">
+          <textarea class="update task-name-update js-text-update" data-field="name" data-index="${index}">${taskName}</textarea>
+
+          <div class="card-column-two">
+            <p class="urgency">${urgency}</p>
+            <select class="update js-dropdown-update status-update" data-field="status" data-index="${index}">
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Complete">Complete</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="date-row">
+          <label class="label" for="do-date-${index}">Do Date</label>
+          <label class="label" for="due-date-${index}">Due Date</label>
+          <input type="date" class="update do-date js-date-update" data-field="doDate" value="${doDate}" data-index="${index}" id="do-date-${index}">
+          <input type="date" class="update due-date js-date-update" data-field="dueDate" value="${dueDate}" data-index="${index}" id="due-date-${index}">
+        </div>
+
+        <div class="notes-section">
+          <label class="label" for="notes-${index}">Notes</label>
+          <div class="third-row">
+            <input class="update js-text-update notes-update" data-field="notes" data-index="${index}" value="${notes}" placeholder="Add notes..." id="notes-${index}">
+            <button type="button" class="js-delete-button delete-button" data-index="${index}">Delete</button>
+          </div>
+        </div>
+      </div>
     `;
-    taskListHTML += taskHTML;
   });
+
   taskListElement.innerHTML = taskListHTML;
   localStorage.setItem('taskList', JSON.stringify(taskList));
 
   document.querySelectorAll('.js-dropdown-update').forEach((dropdownField, index) => {
-    dropdownField.value = taskList[index].status
+    dropdownField.value = taskList[index].status;
   });
-  attachListeners()
+
+  attachListeners();
+}
+
+function getUrgency(taskIndex) {
+  const todayDate = getLocalOSDateString();
+  const doDate = taskList[taskIndex].doDate;
+  const dueDate = taskList[taskIndex].dueDate;
+  const status = taskList[taskIndex].status;
+
+  if (status === 'Complete') return `&#128994; Completed`;
+  if (todayDate === false) return `Date Error`;
+  if (doDate === '' || dueDate === '') return `Incomplete Dates`;
+  if (doDate && dueDate && doDate > dueDate) return `&#128308; Do Date Past Due Date`;
+  if (dueDate && dueDate < todayDate) return `&#128308; Past Due`;
+  if (dueDate && dueDate === todayDate) return `&#128308; Due Today`;
+  if (doDate && doDate < todayDate) return `&#128992; Past To-Do Date`;
+  if (doDate && doDate === todayDate) return `&#128993; Do Today`;
+
+  return `&#9898; Upcoming`;
 }
 
 function attachListeners() {
-  document.querySelectorAll('.js-delete-button').forEach((deleteButton, index) => {
+  document.querySelectorAll('.js-delete-button').forEach((deleteButton) => {
+    const index = Number(deleteButton.dataset.index);
     deleteButton.addEventListener('click', () => {
       deleteTask(index, true);
     });
@@ -82,96 +122,80 @@ function attachListeners() {
 
   document.querySelectorAll('.js-text-update').forEach((textElement) => {
     const fieldName = textElement.dataset.field;
-    const index = textElement.dataset.index;
-
-    textElement.addEventListener('focus', () => {
-      if (fieldName === 'notes' && textElement.value === '-') {
-        textElement.value = '';
-      }
-    });
+    const index = Number(textElement.dataset.index);
 
     textElement.addEventListener('change', () => {
       const newInput = textElement.value;
-        if (inputCheckStrings(newInput)) {
-        taskList[index][fieldName] = newInput;
-        renderToDoList();
-      } else if (fieldName === 'notes' && newInput.trim() === '') {
-        textElement.value = '-';
-        taskList[index][fieldName] = '-';
+      const isRequired = fieldName === 'name';
+
+      if (inputCheckStrings(newInput, isRequired)) {
+        taskList[index][fieldName] = newInput.trim();
         renderToDoList();
       } else {
-        textElement.classList.add('invalid')
-      }
-    });
-
-    textElement.addEventListener('blur', () => {
-      if (fieldName === 'notes' && textElement.value.trim() === '') {
-        textElement.value = '-';
+        textElement.classList.add('invalid');
       }
     });
   });
-  
+
   document.querySelectorAll('.js-date-update').forEach((dateElement) => {
     dateElement.addEventListener('change', () => {
       const fieldName = dateElement.dataset.field;
-      const index = dateElement.dataset.index;
+      const index = Number(dateElement.dataset.index);
       const newInput = dateElement.value;
+
       if (inputCheckDates(newInput)) {
         taskList[index][fieldName] = newInput;
-        renderToDoList()
+        renderToDoList();
       } else {
-        dateElement.classList.add('invalid')
+        dateElement.classList.add('invalid');
       }
     });
   });
-  
+
   document.querySelectorAll('.js-dropdown-update').forEach((dropdownElement) => {
     dropdownElement.addEventListener('change', () => {
       const fieldName = dropdownElement.dataset.field;
-      const index = dropdownElement.dataset.index;
+      const index = Number(dropdownElement.dataset.index);
       const newInput = dropdownElement.value;
+
       if (inputCheckDropdown(dropdownElement, newInput)) {
         taskList[index][fieldName] = newInput;
-        renderToDoList()
+        renderToDoList();
       } else {
-        dropdownElement.classList.add('invalid')
+        dropdownElement.classList.add('invalid');
       }
     });
   });
 }
 
 function inputCheckStrings(input, isRequired = true) {
-  if (typeof input !== 'string') return false; // error not a string
-  if (input.trim() === '' && isRequired) return false; // error empty string
-  if (input.trim().length > 500) return false; // error too long
-
-  return true; // only returns true if none of the return false trigger
+  if (typeof input !== 'string') return false;
+  if (input.trim() === '' && isRequired) return false;
+  if (input.trim().length > 500) return false;
+  return true;
 }
 
 function inputCheckDates(input) {
-  if (typeof input !== 'string') return false; // error not a string (all dates passed are strings)
-  if (isNaN(Date.parse(input)) && input.trim() !== '') return false; // error not a date and not empty
-
-  return true; // only returns true if none of the return false trigger
+  if (typeof input !== 'string') return false;
+  if (isNaN(Date.parse(input)) && input.trim() !== '') return false;
+  return true;
 }
 
 function inputCheckDropdown(inputElementName, input) {
-  let allowedOptions = [];
-  for (const options of inputElementName.options) {
-    allowedOptions.push(options.value);
+  const allowedOptions = [];
+  for (const option of inputElementName.options) {
+    allowedOptions.push(option.value);
   }
+  return allowedOptions.includes(input);
+}
 
-  if (!allowedOptions.includes(input)) return false; // checks if it is in the list of allowable options
-  return true; // only returns true if none of the return false trigger
-} 
-
-function replaceSymbolsHTMLEntities (input) {
+function replaceSymbolsHTMLEntities(input) {
   return String(input)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");  
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function validateInformation() {
@@ -180,8 +204,7 @@ function validateInformation() {
   const status = statusInputElement.value;
   const dueDate = dueDateInputElement.value;
   const doDate = doDateInputElement.value;
-  let notes = notesInputElement.value;
-  if (notes.trim() === '') notes = '-';
+  const notes = notesInputElement.value.trim();
 
   taskNameInputElement.classList.remove('invalid');
   statusInputElement.classList.remove('invalid');
@@ -189,40 +212,42 @@ function validateInformation() {
   doDateInputElement.classList.remove('invalid');
   notesInputElement.classList.remove('invalid');
 
-  if (inputCheckStrings(taskName) === false) {
+  if (!inputCheckStrings(taskName, true)) {
     taskNameInputElement.classList.add('invalid');
     isValid = false;
   }
 
-  if (inputCheckDropdown(statusInputElement, status) === false) {
+  if (!inputCheckDropdown(statusInputElement, status)) {
     statusInputElement.classList.add('invalid');
     isValid = false;
   }
 
-  if (inputCheckDates(dueDate) === false) {
+  if (!inputCheckDates(dueDate)) {
     dueDateInputElement.classList.add('invalid');
     isValid = false;
   }
 
-  if (inputCheckDates(doDate) === false) {
+  if (!inputCheckDates(doDate)) {
     doDateInputElement.classList.add('invalid');
     isValid = false;
   }
 
-  if (inputCheckStrings(notes) === false) {
+  if (!inputCheckStrings(notes, false)) {
     notesInputElement.classList.add('invalid');
     isValid = false;
   }
 
-  if (isValid === false) return;
-  const payload = {
+  if (!isValid) return;
+  payload = {
     name: taskName,
-    status: status,
-    doDate: doDate,
-    dueDate: dueDate,
-    notes: notes
+    status,
+    doDate,
+    dueDate,
+    notes
   }
+
   addTask(payload);
+
   taskNameInputElement.value = '';
   statusInputElement.value = 'Not Started';
   doDateInputElement.value = '';
@@ -232,15 +257,25 @@ function validateInformation() {
 
 function deleteTask(index, renderUpdate) {
   taskList.splice(index, 1);
+  localStorage.setItem('taskList', JSON.stringify(taskList));
   if (renderUpdate) {
     renderToDoList();
   }
 }
 
-document.body.querySelector('.input-row').addEventListener('keydown', event => {
+function getLocalOSDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const date = `${year}-${month}-${day}`;
+  return inputCheckDates(date) ? date : false;
+}
+
+document.body.querySelector('.input-row').addEventListener('keydown', (event) => {
   if (event.key === 'Enter') validateInformation();
 });
 
-addButtonElement.addEventListener('click', event => {
-  validateInformation()
+addButtonElement.addEventListener('click', () => {
+  validateInformation();
 });
