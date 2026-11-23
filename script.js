@@ -44,10 +44,10 @@ function renderToDoList() {
   let taskListHTML = '';
   let taskHTML = '';
   taskList.forEach((value, index) => {
-    const taskName = value.name;
-    const doDate = value.doDate;
-    const dueDate = value.dueDate;
-    const notes = value.notes;
+    const taskName = replaceSymbolsHTMLEntities(value.name);
+    const doDate = replaceSymbolsHTMLEntities(value.doDate);
+    const dueDate = replaceSymbolsHTMLEntities(value.dueDate);
+    const notes = replaceSymbolsHTMLEntities(value.notes);
     taskHTML = `      
       <div class="task-card">
         <input class="update task-name-update js-text-update" data-field="name" data-index="${index}" value="${taskName}">
@@ -144,16 +144,13 @@ function inputCheckStrings(input, isRequired = true) {
   if (typeof input !== 'string') return false; // error not a string
   if (input.trim() === '' && isRequired) return false; // error empty string
   if (input.trim().length > 500) return false; // error too long
-  if (input.includes('<') || input.includes('>')) return false; // error contains < or > (to stop XSS attacks)
 
   return true; // only returns true if none of the return false trigger
 }
 
 function inputCheckDates(input) {
   if (typeof input !== 'string') return false; // error not a string (all dates passed are strings)
-  if (input === '') return false; // error blank date
-  if (isNaN(Date.parse(input))) return false; // error not a date
-  if (input.includes('<') || input.includes('>')) return false; // error contains < or > (to stop XSS attacks)
+  if (isNaN(Date.parse(input)) && input.trim() !== '') return false; // error not a date and not empty
 
   return true; // only returns true if none of the return false trigger
 }
@@ -166,6 +163,15 @@ function inputCheckDropdown(inputElementName, input) {
 
   if (!allowedOptions.includes(input)) return false; // checks if it is in the list of allowable options
   return true; // only returns true if none of the return false trigger
+} 
+
+function replaceSymbolsHTMLEntities (input) {
+  return String(input)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");  
 }
 
 function validateInformation() {
