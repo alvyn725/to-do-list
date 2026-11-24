@@ -70,6 +70,14 @@
   .sidebar {
   }
 
+  .task-list-area,
+  .task-card,
+  .task-name-update,
+  .date-row input,
+  .notes-update {
+    min-width: 0;
+  }
+
   .task-list-area {
     display: flex;
     flex-direction: column;
