@@ -46,6 +46,20 @@
     background-color: var(--bg-recessed);
   }
 
+  input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("calender.svg");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 0.875rem;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+
   .layout {
     min-height: calc(100dvh - 1rem);
     align-items: stretch;  
@@ -180,18 +194,25 @@
     width: 100%;
     font-family: 'Inter', sans-serif;
     padding: 0.75rem;
-    background-color: var(--bg-surface);
+    background-color: var(--accent);
+    color: var(--bg-canvas);
     border: none;
     margin-top: 0.75rem;
-    color: var(--text-muted);
+
     border-radius: 8px;
     margin-bottom: 1.5rem;
     max-width: 2100px;
+
+    outline-width: 2px;
+    outline-style: solid;
+    outline-offset: -2px;
+    outline-color: transparent;
     transition: all 0.15s;
   }
 
   .add-button:hover {
-    background-color: var(--accent);
+    outline-color: var(--accent);
+    background-color: var(--bg-surface);
     color: var(--text-primary);
   }
 
