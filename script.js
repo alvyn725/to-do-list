@@ -57,7 +57,7 @@ function renderToDoList() {
           <textarea class="update task-name-update js-text-update" data-field="name" data-index="${index}">${taskName}</textarea>
 
           <div class="card-column-two">
-            <p class="urgency">${urgency}</p>
+            <p class="urgency js-urgency">${urgency}</p>
             <select class="update js-dropdown-update status-update" data-field="status" data-index="${index}">
               <option value="Not Started">Not Started</option>
               <option value="In Progress">In Progress</option>
@@ -67,10 +67,10 @@ function renderToDoList() {
         </div>
 
         <div class="date-row">
-          <label class="label" for="do-date-${index}">Do Date</label>
-          <label class="label" for="due-date-${index}">Due Date</label>
-          <input type="date" class="update do-date js-date-update" data-field="doDate" value="${doDate}" data-index="${index}" id="do-date-${index}">
-          <input type="date" class="update due-date js-date-update" data-field="dueDate" value="${dueDate}" data-index="${index}" id="due-date-${index}">
+          <label for="do-date-${index}">Do Date</label>
+          <label for="due-date-${index}">Due Date</label>
+          <input type="date" class="update js-date-update" data-field="doDate" value="${doDate}" data-index="${index}" id="do-date-${index}">
+          <input type="date" class="update js-date-update" data-field="dueDate" value="${dueDate}" data-index="${index}" id="due-date-${index}">
         </div>
 
         <div class="notes-section">
@@ -100,19 +100,32 @@ function getUrgency(taskIndex) {
   const dueDate = taskList[taskIndex].dueDate;
   const status = taskList[taskIndex].status;
 
-  if (status === 'Complete') return `&#128994; Completed`;
+  if (status === 'Complete') return `Completed`;
   if (todayDate === false) return `Date Error`;
   if (doDate === '' || dueDate === '') return `Incomplete Dates`;
-  if (doDate && dueDate && doDate > dueDate) return `&#128308; Do Date Past Due Date`;
-  if (dueDate && dueDate < todayDate) return `&#128308; Past Due`;
-  if (dueDate && dueDate === todayDate) return `&#128308; Due Today`;
-  if (doDate && doDate < todayDate) return `&#128992; Past To-Do Date`;
-  if (doDate && doDate === todayDate) return `&#128993; Do Today`;
+  if (doDate && dueDate && doDate > dueDate) return `Invalid Dates`;
+  if (dueDate && dueDate < todayDate) return `Past Due`;
+  if (dueDate && dueDate === todayDate) return `Due Today`;
+  if (doDate && doDate < todayDate) return `Past To-Do Date`;
+  if (doDate && doDate === todayDate) return `Do Today`;
 
-  return `&#9898; Upcoming`;
+  return `Upcoming`;
 }
 
 function attachListeners() {
+  document.querySelectorAll('.js-urgency').forEach((urgencyElement) => {
+    urgencyElement.className = 'js-urgency urgency';
+
+    const text = urgencyElement.textContent
+    function addClass(className) {
+      urgencyElement.classList.add(className);
+    }
+    if (text === 'Completed') addClass('urgency-green'); 
+    else if (text === 'Date Error' || text === 'Invalid Dates' || text === 'Past Due' || text === 'Due Today') addClass('urgency-red');
+    else if (text === 'Past To-Do Date' || text === 'Incomplete Dates' || text === 'Do Today') addClass('urgency-orange');
+    else addClass('urgency-white');
+  });
+
   document.querySelectorAll('.js-delete-button').forEach((deleteButton) => {
     const index = Number(deleteButton.dataset.index);
     deleteButton.addEventListener('click', () => {
@@ -123,6 +136,13 @@ function attachListeners() {
   document.querySelectorAll('.js-text-update').forEach((textElement) => {
     const fieldName = textElement.dataset.field;
     const index = Number(textElement.dataset.index);
+
+    textElement.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        textElement.blur();
+      }
+    });
 
     textElement.addEventListener('change', () => {
       const newInput = textElement.value;
@@ -211,7 +231,7 @@ function validateInformation() {
   dueDateInputElement.classList.remove('invalid');
   doDateInputElement.classList.remove('invalid');
   notesInputElement.classList.remove('invalid');
-
+  
   if (!inputCheckStrings(taskName, true)) {
     taskNameInputElement.classList.add('invalid');
     isValid = false;
@@ -238,7 +258,7 @@ function validateInformation() {
   }
 
   if (!isValid) return;
-  payload = {
+  const payload = {
     name: taskName,
     status,
     doDate,
@@ -258,6 +278,7 @@ function validateInformation() {
 function deleteTask(index, renderUpdate) {
   taskList.splice(index, 1);
   localStorage.setItem('taskList', JSON.stringify(taskList));
+  
   if (renderUpdate) {
     renderToDoList();
   }
@@ -273,7 +294,7 @@ function getLocalOSDateString() {
 }
 
 document.body.querySelector('.input-row').addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') validateInformation();
+  if (event.key === 'Enter' && !event.repeat) validateInformation();
 });
 
 addButtonElement.addEventListener('click', () => {

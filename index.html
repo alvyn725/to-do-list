@@ -5,30 +5,44 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <div class="info-row">
-      <label for="task-name">Task Name</label>
-      <label for="status">Status</label>
-      <label for="urgency">Urgency</label>
-      <label for="do-date">Do Date</label>
-      <label for="due-date">Due Date</label>
-      <label for="notes">Notes</label>
+    <div class="layout">
+      <div class="sidebar">sidebar</div>
+      <div class="task-list-area">
+        <div class="input-row">
+          <div class="input-row-section">
+            <label for="task-name">Task Name</label>
+            <input placeholder="e.g. Walk my dog" class="js-task-name-input" id="task-name">    
+          </div>
+          <div class="input-row-section">
+            <label for="status">Status</label>
+            <select id="status" class="js-status-input">
+              <option selected>Not Started</option>
+              <option>In Progress</option>
+              <option>Complete</option>
+            </select>
+          </div>
+          <div class="input-row-section">
+            <label for="urgency">Urgency</label>
+            <p class="urgency-notes" id="urgency">Auto Selected</p>  
+          </div>
+          <div class="input-row-section">
+            <label for="do-date">Do Date</label>
+            <input type="date" class="js-do-date-input" id="do-date">
+          </div>
+          <div class="input-row-section">
+            <label for="due-date">Due Date</label>
+            <input type="date" class="js-due-date-input" id="due-date">
+          </div>
+          <div class="input-row-section">
+            <label for="notes">Notes</label>
+            <input placeholder="e.g Make sure walk him along Oak Street" class="js-notes-input" id="notes">
+          </div>
+        </div>  
+        <button class="js-add-button add-button">Add</button>
+    
+        <div class="js-task-list task-list"></div>
+      </div>
     </div>
-    <div class="input-row">
-      <input placeholder="e.g. Walk my dog" class="js-task-name-input" id="task-name">
-      <select id="status" class="js-status-input">
-        <option selected>Not Started</option>
-        <option>In Progress</option>
-        <option>Complete</option>
-      </select>
-      <p class="urgency" id="urgency">Auto Selected</p>
-
-      <input type="date" class="js-do-date-input" id="do-date">
-      <input type="date" class="js-due-date-input" id="due-date">
-      <input placeholder="e.g Make sure walk him along Oak Street" class="js-notes-input" id="notes">
-      <button class="js-add-button">Add</button>
-    </div>  
-
-    <div class="js-task-list task-list"></div>
     <script src="script.js"></script>
   </body>
 </html>
