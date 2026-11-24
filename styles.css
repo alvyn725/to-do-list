@@ -130,10 +130,9 @@
   .input-row-section input[type="date"] {
     appearance: none;
     -webkit-appearance: none;
-    display: block;
-    width: calc(100% - 1.5rem);
-    min-width: calc(100% - 1.5rem);
-    max-width: calc(100% - 1.5rem);
+    width: auto;
+    min-width: 0;
+    margin: 0.75rem;
   }
 
   .input-row-section input,
