@@ -67,10 +67,14 @@ function renderToDoList() {
         </div>
 
         <div class="date-row">
-          <label for="do-date-${index}">Do Date</label>
-          <label for="due-date-${index}">Due Date</label>
-          <input type="date" class="update js-date-update" data-field="doDate" value="${doDate}" data-index="${index}" id="do-date-${index}">
-          <input type="date" class="update js-date-update" data-field="dueDate" value="${dueDate}" data-index="${index}" id="due-date-${index}">
+          <div class="date-row-section">
+            <label for="do-date-${index}">Do Date</label>
+            <input type="date" class="update js-date-update" data-field="doDate" value="${doDate}" data-index="${index}" id="do-date-${index}">
+          </div>
+          <div class="date-row-section">
+            <label for="due-date-${index}">Due Date</label>
+            <input type="date" class="update js-date-update" data-field="dueDate" value="${dueDate}" data-index="${index}" id="due-date-${index}">
+          </div>
         </div>
 
         <div class="notes-section">
@@ -231,7 +235,7 @@ function validateInformation() {
   dueDateInputElement.classList.remove('invalid');
   doDateInputElement.classList.remove('invalid');
   notesInputElement.classList.remove('invalid');
-  
+
   if (!inputCheckStrings(taskName, true)) {
     taskNameInputElement.classList.add('invalid');
     isValid = false;
