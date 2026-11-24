@@ -45,11 +45,6 @@
     margin: 0;
     background-color: var(--bg-recessed);
   }
-  
-  .input-row-section input[type="date"] {
-    display: block;
-    width: calc(100% - 1.5rem);
-  }
 
   .layout {
     min-height: calc(100dvh - 1rem);
@@ -130,6 +125,15 @@
     margin-top: 0.75rem;
     margin-bottom: 0.5rem;
     padding: 0;
+  }
+
+  .input-row-section input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    width: calc(100% - 1.5rem);
+    min-width: calc(100% - 1.5rem);
+    max-width: calc(100% - 1.5rem);
   }
 
   .input-row-section input,
@@ -351,6 +355,15 @@
     color: var(--text-muted);
     margin-bottom: 0.25rem;
     padding-left: 0.25rem;
+  }
+
+  .date-row input[type="date"] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
   }
 
   .date-row input {
