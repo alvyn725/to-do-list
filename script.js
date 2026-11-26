@@ -3,6 +3,7 @@ const addButtonElement = document.querySelector('.js-add-button');
 
 const taskNameInputElement = document.querySelector('.js-task-name-input');
 const statusInputElement = document.querySelector('.js-status-input');
+const subjectInputElement = document.querySelector('.js-subject-input');
 const dueDateInputElement = document.querySelector('.js-due-date-input');
 const doDateInputElement = document.querySelector('.js-do-date-input');
 const notesInputElement = document.querySelector('.js-notes-input');
@@ -23,6 +24,7 @@ if (!Array.isArray(taskList)) {
       !value ||
       !inputCheckStrings(value.name) ||
       !inputCheckDropdown(statusInputElement, value.status) ||
+      !inputCheckDropdown(subjectInputElement, value.subject) ||
       !inputCheckDates(value.dueDate) ||
       !inputCheckDates(value.doDate) ||
       !inputCheckStrings(value.notes, false)
@@ -58,6 +60,12 @@ function renderToDoList() {
 
           <div class="card-column-two">
             <p class="urgency js-urgency">${urgency}</p>
+            <select id="subject-${index}" class="update js-dropdown-update subject-update" data-field="subject" data-index="${index}">
+              <option value="English">English</option>
+              <option value="Math">Math</option>
+              <option value="Science">Science</option>
+              <option value="Mother Tounge">Mother Tounge</option>
+            </select>
             <select class="update js-dropdown-update status-update" data-field="status" data-index="${index}">
               <option value="Not Started">Not Started</option>
               <option value="In Progress">In Progress</option>
@@ -91,8 +99,10 @@ function renderToDoList() {
   taskListElement.innerHTML = taskListHTML;
   localStorage.setItem('taskList', JSON.stringify(taskList));
 
-  document.querySelectorAll('.js-dropdown-update').forEach((dropdownField, index) => {
-    dropdownField.value = taskList[index].status;
+  document.querySelectorAll('.js-dropdown-update').forEach((dropdownField) => {
+    const index = Number(dropdownField.dataset.index);
+    const field = dropdownField.dataset.field;
+    dropdownField.value = taskList[index][field];
   });
 
   attachListeners();
@@ -120,11 +130,11 @@ function attachListeners() {
   document.querySelectorAll('.js-urgency').forEach((urgencyElement) => {
     urgencyElement.className = 'js-urgency urgency';
 
-    const text = urgencyElement.textContent
+    const text = urgencyElement.textContent;
     function addClass(className) {
       urgencyElement.classList.add(className);
     }
-    if (text === 'Completed') addClass('urgency-green'); 
+    if (text === 'Completed') addClass('urgency-green');
     else if (text === 'Date Error' || text === 'Invalid Dates' || text === 'Past Due' || text === 'Due Today') addClass('urgency-red');
     else if (text === 'Past To-Do Date' || text === 'Incomplete Dates' || text === 'Do Today') addClass('urgency-orange');
     else addClass('urgency-white');
@@ -226,12 +236,14 @@ function validateInformation() {
   let isValid = true;
   const taskName = taskNameInputElement.value.trim();
   const status = statusInputElement.value;
+  const subject = subjectInputElement.value;
   const dueDate = dueDateInputElement.value;
   const doDate = doDateInputElement.value;
   const notes = notesInputElement.value.trim();
 
   taskNameInputElement.classList.remove('invalid');
   statusInputElement.classList.remove('invalid');
+  subjectInputElement.classList.remove('invalid');
   dueDateInputElement.classList.remove('invalid');
   doDateInputElement.classList.remove('invalid');
   notesInputElement.classList.remove('invalid');
@@ -243,6 +255,11 @@ function validateInformation() {
 
   if (!inputCheckDropdown(statusInputElement, status)) {
     statusInputElement.classList.add('invalid');
+    isValid = false;
+  }
+
+  if (!inputCheckDropdown(subjectInputElement, subject)) {
+    subjectInputElement.classList.add('invalid');
     isValid = false;
   }
 
@@ -265,15 +282,17 @@ function validateInformation() {
   const payload = {
     name: taskName,
     status,
+    subject,
     doDate,
     dueDate,
     notes
-  }
+  };
 
   addTask(payload);
 
   taskNameInputElement.value = '';
   statusInputElement.value = 'Not Started';
+  subjectInputElement.value = 'English';
   doDateInputElement.value = '';
   dueDateInputElement.value = '';
   notesInputElement.value = '';
@@ -282,7 +301,7 @@ function validateInformation() {
 function deleteTask(index, renderUpdate) {
   taskList.splice(index, 1);
   localStorage.setItem('taskList', JSON.stringify(taskList));
-  
+
   if (renderUpdate) {
     renderToDoList();
   }
