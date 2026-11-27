@@ -8,11 +8,54 @@ const dueDateInputElement = document.querySelector('.js-due-date-input');
 const doDateInputElement = document.querySelector('.js-do-date-input');
 const notesInputElement = document.querySelector('.js-notes-input');
 
+function getOffsetDateString(daysOffset = 0) {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const formatted = `${year}-${month}-${day}`;
+  return inputCheckDates(formatted) ? formatted : '';
+}
+
+const savedTasksRaw = localStorage.getItem('taskList');
 let taskList = [];
-try {
-  taskList = JSON.parse(localStorage.getItem('taskList')) || [];
-} catch {
-  taskList = [];
+
+if (savedTasksRaw === null) {
+  taskList = [
+    {
+      name: 'Math Paper 2',
+      status: 'Not Started',
+      subject: 'Math',
+      doDate: getOffsetDateString(0),  
+      dueDate: getOffsetDateString(1),  
+      notes: 'Timed Practice: 1 hour 15 minutes'
+    },
+
+    {
+      name: 'English Situational Writing Draft',
+      status: 'In Progress',
+      subject: 'English',
+      doDate: getOffsetDateString(-1),
+      dueDate: getOffsetDateString(2), 
+      notes: 'Check tone and word count (250 to 350 words)'
+    },
+    
+    {
+      name: 'Science Chemistry Worksheet',
+      status: 'Not Started',
+      subject: 'Science',
+      doDate: getOffsetDateString(0),
+      dueDate: getOffsetDateString(0), 
+      notes: 'Acids, Bases and Salts review'
+    }
+  ];
+} else {
+  try {
+    taskList = JSON.parse(savedTasksRaw) || [];
+  } catch {
+    taskList = [];
+  }
 }
 
 if (!Array.isArray(taskList)) {
