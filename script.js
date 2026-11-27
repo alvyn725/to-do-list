@@ -40,7 +40,7 @@ if (savedTasksRaw === null) {
       dueDate: getOffsetDateString(2), 
       notes: 'Check tone and word count (250 to 350 words)'
     },
-    
+
     {
       name: 'Science Chemistry Worksheet',
       status: 'Not Started',
@@ -107,7 +107,7 @@ function renderToDoList() {
               <option value="English">English</option>
               <option value="Math">Math</option>
               <option value="Science">Science</option>
-              <option value="Mother Tounge">Mother Tounge</option>
+              <option value="Mother Tongue">Mother Tongue</option>
             </select>
             <select class="update js-dropdown-update status-update" data-field="status" data-index="${index}">
               <option value="Not Started">Not Started</option>
