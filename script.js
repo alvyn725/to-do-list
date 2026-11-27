@@ -44,14 +44,14 @@ function addTask(payload) {
 
 function renderToDoList() {
   let taskListHTML = '';
-
+  reorderTaskList()
   taskList.forEach((value, index) => {
     const taskName = replaceSymbolsHTMLEntities(value.name);
     const doDate = replaceSymbolsHTMLEntities(value.doDate);
     const dueDate = replaceSymbolsHTMLEntities(value.dueDate);
     const rawNotes = value.notes === 'Add notes...' ? '' : (value.notes || '');
     const notes = replaceSymbolsHTMLEntities(rawNotes);
-    const urgency = getUrgency(index);
+    const urgency = getUrgency(index).name;
 
     taskListHTML += `
       <div class="task-card">
@@ -114,16 +114,45 @@ function getUrgency(taskIndex) {
   const dueDate = taskList[taskIndex].dueDate;
   const status = taskList[taskIndex].status;
 
-  if (status === 'Complete') return `Completed`;
-  if (todayDate === false) return `Date Error`;
-  if (doDate === '' || dueDate === '') return `Incomplete Dates`;
-  if (doDate && dueDate && doDate > dueDate) return `Invalid Dates`;
-  if (dueDate && dueDate < todayDate) return `Past Due`;
-  if (dueDate && dueDate === todayDate) return `Due Today`;
-  if (doDate && doDate < todayDate) return `Past To-Do Date`;
-  if (doDate && doDate === todayDate) return `Do Today`;
+  if (status === 'Complete') return {name: 'Completed', className: 'urgency-green', urgency: 7};
+  if (todayDate === false) return {name: 'Date Error', className: 'urgency-red', urgency: 1};
+  if (doDate === '' || dueDate === '') return {name: 'Incomplete Dates', className: 'urgency-orange', urgency: 5};
+  if (doDate && dueDate && doDate > dueDate) return {name: 'Invalid Dates', className: 'urgency-red', urgency: 1};
+  if (dueDate && dueDate < todayDate) return {name: 'Past Due', className: 'urgency-red', urgency: 2};
+  if (dueDate && dueDate === todayDate) return {name: 'Due Today', className: 'urgency-red', urgency: 3};
+  if (doDate && doDate < todayDate) return {name: 'Past To-Do Date', className: 'urgency-orange', urgency: 4};
+  if (doDate && doDate === todayDate) return {name: 'Do Today', className: 'urgency-orange', urgency: 5};
 
-  return `Upcoming`;
+  return {name: 'Upcoming', className: 'urgency-white', urgency: 6};
+}
+
+function reorderTaskList() {
+  const reorderedTaskList = [];
+  const priority = {
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+    6: [],
+    7: []
+  }
+  for (let priorityLevel = 1; priorityLevel <= 7; priorityLevel++) {
+    for (let i = 0; i < taskList.length; i++) {
+      const urgency = getUrgency(i)
+      const writeList = priority[priorityLevel]
+      if (urgency.urgency === priorityLevel) {
+        writeList.push(taskList[i]);
+      } else {
+        continue
+      }
+    }
+    for (let i = 0; i < priority[priorityLevel].length; i++) {
+      const task = priority[priorityLevel][i];
+      reorderedTaskList.push(task);
+    }
+  }
+  taskList = reorderedTaskList;
 }
 
 function attachListeners() {
@@ -285,7 +314,7 @@ function validateInformation() {
     subject,
     doDate,
     dueDate,
-    notes
+    notes,
   };
 
   addTask(payload);
