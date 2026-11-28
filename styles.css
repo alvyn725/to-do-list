@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@layer normal, critical;
+@layer setup, sidebar, todo-page, critical;
+/*
+priority goes from right(highest) to left (lowest), so critical has highest priority
+*/
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); } 
@@ -7,20 +10,20 @@
   75% { transform: translateX(5px); }
 }
 
-input[type="date"] {
-  position: relative;
-}
+@layer setup {
+  input[type="date"] {
+    position: relative;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-@layer normal {
   :root {
     color-scheme: dark;
 
@@ -66,31 +69,140 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     gap: 1.5rem;
     background-color: var(--bg-recessed);
     min-height: calc(100vh - 1rem);
-    align-items: stretch;  
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 768px) {
     .layout {
       grid-template-columns: 18rem 1fr;
     }
   }
   
-  @media (max-width: 1199px) {
+  @media (max-width: 767px) {
     .layout {
-      grid-template-rows: 6rem 1fr; 
-    }
-    .sidebar {
-      width: 100%;
-      height: 100%;
+      grid-template-rows: max-content 1fr; 
     }
   }
+}
 
+@layer sidebar {
   .sidebar {
     background-color: var(--bg-canvas);
     border-radius: 20px;
     padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
 
+  .sidebar-top-area {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .sidebar-top-area button {
+    background-color: var(--bg-surface);
+    border: none;
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    border-radius: 12px;
+    height: 3rem;
+    padding: 0 0.5rem;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .sidebar-top-area button:hover {
+    outline-color: var(--accent);
+    color: var(--text-primary);
+  }
+
+  .sidebar-bottom-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .coins-count-area {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .coin-icon {
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .coin-count {
+    color: var(--text-muted);
+    font-size: var(--text-base);
+    padding: 0;
+    margin: 0;
+  }
+
+  .account-settings {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    background-color: var(--bg-surface);
+    border-radius: 12px;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .user-profile-picture {
+    height: 2.5rem;
+    width: 2.5rem;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .username {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    text-align: left;
+    padding: 0;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 768px) {
+    .sidebar {
+      position: sticky;
+      top: 0.5rem;
+      height: calc(100vh - 1rem);
+    }
+
+    .sidebar-top-area {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar-top-area button {
+      text-align: left;
+      padding: 0 0.85rem;
+    }
+
+    .sidebar-bottom-area {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@layer todo-page {
   .task-list-area,
   .task-card,
   .task-name-update,
@@ -111,16 +223,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-radius: 20px;
   }
 
-  @media (min-width: 600px) {
+  @media (min-width: 600px) and (max-width: 767px) {
     .input-row {
-      display: grid;
       grid-template-columns: 1fr 1fr;
     }
   }
 
-  @media (min-width: 900px) {
+  @media (min-width: 1050px) {
     .input-row {
-      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .input-row {
       grid-template-columns: 1fr 1fr 1fr;
     }
   }
@@ -128,7 +244,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   @media (min-width: 2400px) {
     .input-row {
       width: 2100px;
-      display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
     }
   }
@@ -174,13 +289,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-family: 'Inter', sans-serif;
     color: var(--text-muted);
     font-size: var(--text-base);
-    margin: 0;
-    padding: 0;
     margin: 0.75rem;
+    margin-top: 0;
     padding: 0.75rem;
     background-color: var(--bg-surface);
     border-radius: 8px;
-    margin-top: 0;
     outline-width: 2px;
     outline-style: solid;
     outline-offset: -2px;
@@ -189,30 +302,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .input-row-section input:hover,
-  .input-row-section select:hover {
-    outline-color: var(--accent);
-  }
-
+  .input-row-section select:hover,
   .input-row-section input:focus,
   .input-row-section select:focus {
-    outline-color: var(--accent);
-  }
-
-  .input-row select {
-    appearance: none; 
-    -webkit-appearance: none;
-    background-image: url("chevron.svg");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 0.75rem;
-    outline-width: 2px;
-    outline-style: solid;
-    outline-offset: -2px;
-    outline-color: transparent;
-    transition: outline-color 0.15s;
-  }
-
-  .input-row select:hover {
     outline-color: var(--accent);
   }
 
@@ -224,7 +316,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: var(--bg-canvas);
     border: none;
     margin-top: 0.75rem;
-
     border-radius: 8px;
     margin-bottom: 1.5rem;
     max-width: 2100px;
@@ -253,13 +344,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     flex: 1;
   }
 
-  @media (min-width: 700px) {
+  @media (min-width: 950px) {
     .task-list {
       grid-template-columns: 1fr 1fr;
     }
   }
 
-  @media (min-width: 1000px) {
+  @media (min-width: 1300px) {
     .task-list {
       grid-template-columns: 1fr 1fr 1fr;
     }
@@ -277,7 +368,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-radius: 8px;
     padding: 0.5rem;
   }
-
 
   .first-row {
     display: grid;
@@ -323,7 +413,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-family: 'Inter', sans-serif;
     padding: 0.375rem;
     border-radius: 4px;
-    padding-left: 0.75rem
+    padding-left: 0.75rem;
   }
 
   .urgency-red {
@@ -350,7 +440,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     padding-left: 0.75rem;
     border-radius: 4px;
     background-color: var(--bg-hover);
-    padding-left: 0.75rem;
     font-size: var(--text-base);
     color: var(--text-muted);
 
@@ -360,7 +449,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 0.75rem;
-    transition: border 0.15s;
 
     outline-width: 2px;
     outline-style: solid;
@@ -370,7 +458,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .status-update:hover,
-  .status-update:focus {
+  .status-update:focus,
+  .subject-update:hover,
+  .subject-update:focus {
     outline-color: var(--accent);
   }
 
@@ -429,7 +519,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   .notes-section label {
     font-size: var(--text-xs);
-    color:var(--text-muted);
+    color: var(--text-muted);
     padding-left: 0.25rem;
   }
 
